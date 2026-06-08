@@ -1,12 +1,18 @@
-FROM rust:1.73.0-buster as substrate
+FROM rust:1.73.0-bookworm AS substrate
 
 WORKDIR /substrate
 
 EXPOSE 9944 30333 9933
 
-RUN apt-get update && apt upgrade -y 
-RUN apt install build-essential -y
-RUN apt install --assume-yes git clang curl libssl-dev protobuf-compiler
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+		build-essential \
+		git \
+		clang \
+		curl \
+		libssl-dev \
+		protobuf-compiler \
+	&& rm -rf /var/lib/apt/lists/*
 RUN rustup toolchain install nightly-2023-10-20
 RUN rustup default nightly-2023-10-20
 RUN rustup target add wasm32-unknown-unknown --toolchain nightly-2023-10-20
@@ -49,7 +55,7 @@ RUN cp -r target/release/node-template /aquila-node/target/release/node-template
 
 RUN rm -r /substrate
 
-FROM substrate as aquila-node
+FROM substrate AS aquila-node
 
 RUN chmod +x /aquila-node/config/docker-run.sh
 
